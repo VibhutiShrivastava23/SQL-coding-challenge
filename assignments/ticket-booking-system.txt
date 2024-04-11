@@ -1,0 +1,576 @@
+use ticketbookingsystem;
+show tables;
+/* ############################ TASK 2 #############################
+Q1. write a SQl query to insert aat leat 10 sample records into each table.
+Q2. write a query to list all events.*/
+
+-- insertion in venue table
+insert into venue(venue_name,address) values 
+('mumbai', 'marol andheri(w)'),
+('chennai', 'IT Park'),
+('pondicherry ', 'state beach');
+select * from venue;
+
+-- insertion in customer table
+insert into customer(customer_name,email,phone_number) 
+values
+('harry potter','harry@gmail.com','45454545'),
+('ronald weasley','ron@gmail.com','45454545'),
+('hermione granger','her@gmail.com','45454545'),
+('draco malfoy','drac@gmail.com','45454545'),
+('ginni weasley','ginni@gmail.com','45454545');
+select * from customer;
+
+-- insertion in event table
+
+insert into event(event_name,event_date,event_time,total_seats,available_seats,ticket_price,event_type,venue_id)
+values 
+('Late Ms. Lata Mangeshkar Musical', '2021-09-12','20:00',320,270,600,'concert',3),
+('CSK vs RCB', '2024-04-11','19:30',23000,3,3600,'sports',2),
+('CSK vs RR', '2024-04-19','19:30',23000,10,3400,'sports',2),
+('MI vs KKR', '2024-05-01','15:30',28000,100,8000,'sports',1);
+
+select * from event; 
+
+-- insertion in booking table
+insert into booking (event_id, customer_id, num_tickets, total_cost, booking_date)
+values 
+(1,1,2,640,'2021-09-12'),
+(1,4,3,960,'2021-09-12'),
+(2,1,3,10800,'2024-04-11'),
+(2,3,5,18000,'2024-04-10'),
+(3,5,10,34000,'2024-04-15'),
+(4,2,4,32000,'2024-05-01');
+
+select * from booking;
+
+-- Q3. TO select event with available tickets.
+select  event_name, available_seats
+from event 
+where available_seats >=1;
+
+/*output
+# event_name, available_seats
+Late Ms. Lata Mangeshkar Musical, 270
+CSK vs RCB, 3
+CSK vs RR, 10
+conference cup, 100
+
+*/
+
+
+-- Q4. To select events names partial match with "cup".
+update event
+set event_name='conference cup' where event_id=4;
+
+select *
+from event
+where event_name LIKE '%cup%';
+
+/*output
+# event_id	event_name	event_date	event_time	total_seats	available_seats	ticket_price	event_type	venue_id
+4	conference cup	2024-05-01	15:30:00	28000	100	8000	sports	1
+
+*/
+
+
+-- Q5. TO select events with ticket price range is between 1000 to 2500
+select *
+from event 
+where ticket_price BETWEEN 1000 and 2500;
+
+/*output
+# event_id, event_name, event_date, event_time, total_seats, available_seats, ticket_price, event_type, venue_id
+null
+*/
+
+
+-- Q6. to retrive events with dates falling within a specific range.
+select *
+from event
+where event_date BETWEEN '2021-09-11' and '2024-04-11';
+
+/*output
+# event_id, event_name, event_date, event_time, total_seats, available_seats, ticket_price, event_type, venue_id
+1, Late Ms. Lata Mangeshkar Musical, 2021-09-12, 20:00:00, 320, 270, 600, concert, 3
+2, CSK vs RCB, 2024-04-11, 19:30:00, 23000, 3, 3600, sports, 2
+
+*/
+
+
+-- Q7. to retrive events with available tickets that also have concert in their names
+select * 
+from event
+where available_seats>=1 AND event_name LIKE '%concert%';
+
+/*output
+# event_id, event_name, event_date, event_time, total_seats, available_seats, ticket_price, event_type, venue_id
+null
+*/
+
+
+-- Q8. to retrieve customers in batches of 5, starting from the 6th user.
+-- select * from customer limit 5,5;
+select * from customer limit 2,2;
+
+/*output
+# customer_id, customer_name, email, phone_number
+3, hermione granger, her@gmail.com, 45454545
+4, draco malfoy, drac@gmail.com, 45454545
+
+*/
+
+
+-- Q9. to retrive booking details contain booked no. of tickets more than 4. 
+select *
+from booking
+where num_tickets >4;
+
+/*output
+# event_id, customer_id, num_tickets, total_cost, booking_date
+2, 3, 5, 18000, 2024-04-10
+3, 5, 10, 34000, 2024-04-15
+
+*/
+
+
+-- Q10. to retrieve customer information whose phone number end with ‘000’
+select * from customer
+where phone_number LIKE '%000';
+
+/*output
+# customer_id, customer_name, email, phone_number
+null
+*/
+
+
+-- Q11. to retrieve the events in order whose seat capacity more than 15000.
+select * from event
+where total_seats >15000
+order by total_seats;
+
+/*output
+# event_id, event_name, event_date, event_time, total_seats, available_seats, ticket_price, event_type, venue_id
+2, CSK vs RCB, 2024-04-11, 19:30:00, 23000, 3, 3600, sports, 2
+3, CSK vs RR, 2024-04-19, 19:30:00, 23000, 10, 3400, sports, 2
+4, conference cup, 2024-05-01, 15:30:00, 28000, 100, 8000, sports, 1
+
+*/
+
+
+-- Q12. to select events name not start with ‘x’, ‘y’, ‘z’
+
+select event_name from event
+where event_name NOT LIKE 'x%'
+	and event_name not LIKE'y%'
+	and event_name not LIKE'c%';
+
+/*output
+# event_name
+Late Ms. Lata Mangeshkar Musical
+
+*/
+
+
+/* ########################## TASK 3  #############################
+Q1. Write a SQL query to list events and their average ticket prices.
+*/
+select  avg(ticket_price) as average_ticket_price
+from event;
+
+/*output
+3900
+*/
+
+
+-- Q2. to calculate total revenue generated by events.
+-- total revenue= (total_seats - available_seats) * ticket_price
+select SUM((total_seats - available_seats)* ticket_price) as total_revenue
+from event;
+
+/*output
+# total_revenue
+384185200
+
+*/
+
+
+-- Q3. to find the event with the highest ticket sales.
+select event_name , max((total_seats - available_seats)* ticket_price) as highest_sales
+from event
+group by event_name
+order by highest_sales DESC
+limit 0,1;
+
+/*output
+# event_name, highest_sales
+conference cup, 223200000
+
+*/
+
+
+-- Q4. to calculate the total number of tickets sold for each event.
+
+select event_name, max(total_seats - available_seats) as sold_tickets
+from event
+group by event_name;
+
+/*output
+# event_name, sold_tickets
+Late Ms. Lata Mangeshkar Musical, 50
+CSK vs RCB, 22997
+CSK vs RR, 22990
+conference cup, 27900
+
+*/
+
+ 
+-- Q5. to find events with no ticket sales.
+/*select event_name
+from event 
+where total_seats= available_seats;*/
+select * from event
+where event_id not in(select e.event_id from event e,booking b where e.event_id=b.event_id);
+
+
+/*output
+# event_id, event_name, event_date, event_time, total_seats, available_seats, ticket_price, event_type, venue_id
+null
+*/
+
+
+-- Q6. to find user who booked the most tickets. 
+select c.customer_name, sum(b.num_tickets) as most_tickets
+from customer c, booking b
+where c.customer_id= b.customer_id
+group by customer_name
+order by most_tickets DESC
+limit 0,1;
+
+/*output
+# customer_name, most_tickets
+ginni weasley, 10
+
+*/
+
+
+-- Q7. to list events and the total number of tickets sold for each month. 
+select e.event_name,b.booking_date, sum(b.num_tickets) as total_ticket
+from event e, booking b
+where b.event_id= e.event_id
+group by month(booking_date);
+
+/*output
+# event_name, booking_date, total_ticket
+Late Ms. Lata Mangeshkar Musical, 2021-09-12, 5
+CSK vs RCB, 2024-04-11, 18
+conference cup, 2024-05-01, 4
+
+*/
+
+
+-- Q8. to calculate the average ticket price for events in each venue
+select v.venue_name, avg(e.ticket_price) as average_price
+from venue v, event e
+where v.venue_id= e.venue_id
+group by venue_name
+order by average_price;
+
+/*output
+# venue_name, average_price
+pondicherry , 600
+chennai, 3500
+mumbai, 8000
+
+*/
+
+
+-- Q9. to calculate the total number of tickets sold for each event type. 
+select e.event_name, sum(b.num_tickets) as sold_tickets
+from event e, booking b
+where e.event_id= b.event_id
+group by event_name;
+
+/*output
+# venue_name, average_price
+pondicherry , 600
+chennai, 3500
+mumbai, 8000
+
+*/
+
+
+-- Q10. to calculate the total revenue generated by events in each year. 
+select event_date,sum((total_seats- available_seats)* ticket_price)
+from event 
+group by year(event_date);
+
+/*output
+# event_date, sum((total_seats- available_seats)* ticket_price)
+2021-09-12, 30000
+2024-04-11, 384155200
+
+*/
+
+
+-- Q11. to list user who have booked tickets for multiple events. 
+select c.customer_name
+from customer c join booking b on c.customer_id= b.customer_id
+group by c.customer_name
+having count(*) >1;
+
+/*output
+# customer_name
+harry potter
+
+*/
+
+
+-- Q12. to calculate the total revenue generated by events for each user
+select c.customer_name ,sum((e.total_seats- e.available_seats)* e.ticket_price) as revenue
+from event e join booking b on e.event_id= b.event_id
+			 join customer c on c.customer_id= b.customer_id
+group by c.customer_name
+order by revenue;
+
+/*output
+# customer_name, revenue
+draco malfoy, 30000
+ginni weasley, 78166000
+hermione granger, 82789200
+harry potter, 82819200
+ronald weasley, 223200000
+
+*/
+
+
+-- Q13. to calculate the Average Ticket Price for Events in Each Category and Venue
+select avg(ticket_price) from event;
+select v.venue_name,avg(e.ticket_price)
+from venue v join event e on v.venue_id= e.venue_id
+group by v.venue_name;
+
+/*output
+# venue_name, avg(e.ticket_price)
+mumbai, 8000
+chennai, 3500
+pondicherry , 600
+
+*/
+
+
+-- Q14. to list user and total numberof tickets Thev've Purchased in the Last 30 days
+select c.customer_name, sum(b.num_tickets) as total_number_of_ticket
+from customer c join booking b on c.customer_id=b.customer_id
+where day(b.booking_date)>'11'
+group by customer_name;
+
+select * from booking where day(booking_date)<'15' ;
+
+/*output
+# customer_name, total_number_of_ticket
+harry potter, 2
+draco malfoy, 3
+ginni weasley, 10
+
+*/
+
+
+/* ############################## task 4 #############################
+Q1. calculate the average ticket price from events in each venue using aa subquery
+*/ 
+select v.venue_name, avg(e.ticket_price) as average_tickets_price
+from event e join venue v on e.venue_id= v.venue_id
+group by v.venue_name;
+
+/*output
+# venue_name, average_tickets_price
+mumbai, 8000
+chennai, 3500
+pondicherry , 600
+
+*/
+
+
+-- Q2. find events with more than 50% of tickets sold using subquery
+/* analysis : if(total_seats- available_seats)> (total_seats/2)
+					(320-270) >(320/2)--*/
+
+select * from event
+where(total_seats- available_seats) >(total_seats/2);
+
+/*output
+# event_id, event_name, event_date, event_time, total_seats, available_seats, ticket_price, event_type, venue_id
+2, CSK vs RCB, 2024-04-11, 19:30:00, 23000, 3, 3600, sports, 2
+3, CSK vs RR, 2024-04-19, 19:30:00, 23000, 10, 3400, sports, 2
+4, conference cup, 2024-05-01, 15:30:00, 28000, 100, 8000, sports, 1
+
+*/
+
+
+-- Q3.  calculate the total number of tickets sold for each event
+-- analysis: ticket_sold=(total_seats- available_seats)
+select event_name,sum(total_seats-available_seats) as ticket_sold
+from event
+group by event_name;
+
+/*output
+# event_name, ticket_sold
+Late Ms. Lata Mangeshkar Musical, 50
+CSK vs RCB, 22997
+CSK vs RR, 22990
+conference cup, 27900
+
+*/
+
+
+-- Q4. find users who have not booked any tickets using a NOT EXISTS sub query. 
+-- p: customer, c: booking
+select customer_name
+from customer c left join booking b on c.customer_id=b.customer_id;
+
+select * 
+from customer 
+where customer_id NOT IN(select c.customer_id 
+						from customer c join booking b 
+                        on c.customer_id = b.customer_id);
+/*insert into customer(customer_name, email,phone_number)
+value ('frodo baggins','frodo@lotr.com',35454);
+select * from customer;
+update customer set customer_id=6 where customer_id=11;  */
+select * from venue
+where exists(select * from event where total_seats>27000);
+
+/*output
+# customer_id, customer_name, email, phone_number
+6, frodo baggins, frodo@lotr.com, 35454
+
+*/
+
+
+-- Q5. list events with no ticket sales using not in query
+select * from event
+where event_id not in(select e.event_id from booking b, event e
+					  where e.event_id=b.event_id );
+
+/*output
+# event_id, event_name, event_date, event_time, total_seats, available_seats, ticket_price, event_type, venue_id
+null
+*/
+
+
+-- Q6. cal the total number of tickets sold for each event type 
+-- using a subquery in from clause.
+
+select dt.event_name, sum(dt.total_seats- available_seats) as total_ticket_sold
+from (select * from event) as dt
+group by event_name;
+
+/*output
+# event_name, total_ticket_sold
+Late Ms. Lata Mangeshkar Musical, 50
+CSK vs RCB, 22997
+CSK vs RR, 22990
+conference cup, 27900
+
+*/
+
+
+-- Q7. find events with ticket price higher than the average ticket price
+-- using a subquery in where clause. 
+select avg(ticket_price) from event;
+select * from event
+where ticket_price >(select avg(ticket_price) from event);
+
+/*output
+# event_id, event_name, event_date, event_time, total_seats, available_seats, ticket_price, event_type, venue_id
+4, conference cup, 2024-05-01, 15:30:00, 28000, 100, 8000, sports, 1
+
+*/
+
+
+-- Q8. calculate the total revenue generated by events for each user
+-- using a corelated subquery
+select c.customer_name, sum(total_cost)
+from booking b join customer c on b.customer_id=c.customer_id
+group by c.customer_name;
+
+/*output
+# customer_name, sum(total_cost)
+harry potter, 11440
+draco malfoy, 960
+hermione granger, 18000
+ginni weasley, 34000
+ronald weasley, 32000
+
+*/
+
+
+-- Q9. list users who have booked tickets for events in a given venue
+-- using a subquery in where clause
+select * from customer 
+where customer_id in (select customer_id from booking
+					  where event_id in(select event_id from event
+									    where venue_id in (select venue_id from venue
+														    where venue_name='mumbai')));
+
+/*output
+# customer_id, customer_name, email, phone_number
+2, ronald weasley, ron@gmail.com, 45454545
+
+*/
+
+
+-- Q10. calculate total number of tickets sold for each event category
+-- using subquery with group by
+select e.event_name, sum(b.num_tickets) as sold_tickets
+from event e join booking b on e.event_id=b.event_id
+group by event_name;
+
+/*output
+# event_name, sold_tickets
+Late Ms. Lata Mangeshkar Musical, 5
+CSK vs RCB, 8
+CSK vs RR, 10
+conference cup, 4
+
+*/
+
+
+-- Q11. find user who have booked tickets for events in each month 
+-- using a subquery with date_format
+select booking_date from booking;
+select c.customer_name ,b.booking_date
+from customer c join booking b on c.customer_id= b.customer_id
+group by customer_name, month(booking_date);
+
+/*output
+# customer_name, booking_date
+harry potter, 2021-09-12
+draco malfoy, 2021-09-12
+harry potter, 2024-04-11
+hermione granger, 2024-04-10
+ginni weasley, 2024-04-15
+ronald weasley, 2024-05-01
+
+*/
+
+
+
+-- Q12. calculate the averange ticket price for events in each venue
+-- using a subquery
+select avg(ticket_price) from event;
+select v.venue_name ,avg(e.ticket_price)
+from venue v join event e on v.venue_id= e.venue_id
+group by v.venue_name;
+
+
+/*output
+# venue_name, avg(e.ticket_price)
+mumbai, 8000
+chennai, 3500
+pondicherry , 600
+
+*/
+
+
